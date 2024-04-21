@@ -1,6 +1,6 @@
 # dotted
 
-A new Flutter project.
+dotted
 
 ## Getting Started
 

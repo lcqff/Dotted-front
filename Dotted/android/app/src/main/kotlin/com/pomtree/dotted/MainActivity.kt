@@ -1,4 +1,4 @@
-package com.example.dotted
+package com.pomtree.dotted
 
 import io.flutter.embedding.android.FlutterActivity
 
