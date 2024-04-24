@@ -6,8 +6,7 @@ import 'login/screens/login_screen.dart';
 void main() async {
   print("start");
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");	// 추가
-  KakaoSdk.init(nativeAppKey: dotenv.env['KAKAO_NATIVE_APP_KEY']);
+  await dotenv.load(fileName: '.env');
   runApp(const MyApp());
 }
 
