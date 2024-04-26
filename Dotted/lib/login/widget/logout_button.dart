@@ -27,7 +27,5 @@ class LogoutButton extends StatelessWidget {
   }
 
   void _handleLogout() {
-    LoginService loginService = LoginService();
-    loginService.signOut(loginPlatform, onLogout);
   }
 }

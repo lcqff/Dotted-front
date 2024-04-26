@@ -1,48 +1,45 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:http/http.dart' as http;
 import 'package:dotted/login/utils/login_platform.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:uuid/uuid.dart';
+import 'package:flutter_web_auth/flutter_web_auth.dart';
 
+import '../../home/screens/home_screen.dart';
 
 class LoginService {
-  Future<void> signInWithKakao(LoginPlatform _loginPlatform, Function(LoginPlatform) setLoginPlatform) async {
+  Future<void> signInWithKakao() async {
     try {
-      bool isInstalled = await isKakaoTalkInstalled();
+      final clientState = Uuid().v4();
+      final url = Uri.https('kauth.kakao.com', '/oauth/authorize', {
+        'response_type': 'code',
+        'client_id': dotenv.env['KAKAO_NATIVE_APP_KEY'],
+        'redirect_uri': dotenv.env['REDIRECT_URL'],
+        'state': clientState,
+      });
 
-      OAuthToken token = isInstalled
-          ? await UserApi.instance.loginWithKakaoTalk()
-          : await UserApi.instance.loginWithKakaoAccount();
+      final result = await FlutterWebAuth.authenticate(
+          url: url.toString(), callbackUrlScheme: "webauthcallback");
 
-      final url = Uri.https('kapi.kakao.com', '/v2/user/me');
+      final body = Uri.parse(result).queryParameters;
 
-      final response = await http.get(
-        url,
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer ${token.accessToken}'
-        },
-      );
-      final profileInfo = json.decode(response.body);
-      print(profileInfo.toString());
-
-      setLoginPlatform(LoginPlatform.kakao);
-
+      final Map<String, dynamic> responseBody = json.decode(body as String);
+      final userId = responseBody['userId'];
+      final token = responseBody['token'];
     } catch (error) {
       print('카카오톡 로그인 실패 $error');
     }
   }
 
-  Future<void> signOut(LoginPlatform _loginPlatform, Function(LoginPlatform) setLoginPlatform) async {
-    switch (_loginPlatform) {
-      case LoginPlatform.google:
-        break;
-      case LoginPlatform.kakao:
-        await UserApi.instance.logout();
-      case LoginPlatform.none:
-        break;
-    }
+  void handleLogout(LoginPlatform platform) {}
 
-    setLoginPlatform(LoginPlatform.none);
+  void handleLoginResponse(BuildContext context) {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => HomeScreen()),
+    );
   }
 }
